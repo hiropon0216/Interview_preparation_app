@@ -1,0 +1,2 @@
+# Interview_preparation_app
+スマホ向け面接対策アプリケーション
