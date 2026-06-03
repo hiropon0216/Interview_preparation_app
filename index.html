@@ -160,8 +160,8 @@
   .quiz-close{width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;background:#fff;color:var(--ink-soft);font-size:1.1rem;font-weight:800;box-shadow:var(--shadow);}
   .quiz-timerbar{position:relative;height:16px;border-radius:999px;background:#e7e0f5;overflow:hidden;margin-bottom:8px;}
   .quiz-timerbar::before,.quiz-timerbar::after{content:"";position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,.85);z-index:2;}
-  .quiz-timerbar::before{left:33.33%;}  /* 目安の50%地点（=「いい塩梅」の始まり） */
-  .quiz-timerbar::after{left:66.66%;}   /* 目安の100%地点（=「やや長め」の始まり） */
+  .quiz-timerbar::before{left:20%;}   /* 0.5T：いい塩梅の始まり */
+  .quiz-timerbar::after{left:60%;}    /* 1.5T：やや長めの始まり */
   .quiz-timerbar > i{display:block;height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#74c0fc,#4dabf7);transition:width 1s linear,background .3s;}
   .quiz-timerbar.good > i{background:linear-gradient(90deg,#2ecc71,#26a65b);}
   .quiz-timerbar.warn > i{background:linear-gradient(90deg,#ffd43b,#ff9f43);}
@@ -665,16 +665,16 @@ function startTimer(){
 function updateTimerUI(){
   const goal = settings.quizSeconds, el = quiz.elapsed;   // 目安時間。超えても止めない（ストップウォッチ）
   const ratio = goal>0 ? el/goal : 0;
-  // 目安(T)を基準にした相対4ゾーン：〜0.5T 短め / 0.5〜1.0T いい塩梅 / 1.0〜1.5T やや長め / 1.5T〜 長い
+  // B案ゾーン：〜0.5T 短め / 0.5〜1.5T いい塩梅 / 1.5〜2.5T やや長め / 2.5T〜 長い
   let cls="", label="🔵 まだ短め", lvl=0;
-  if(ratio>=1.5){ cls="danger"; label="🔴 長い・巻こう"; lvl=2; }
-  else if(ratio>=1.0){ cls="warn"; label="🟡 やや長め"; lvl=1; }
+  if(ratio>=2.5){ cls="danger"; label="🔴 長い・巻こう"; lvl=2; }
+  else if(ratio>=1.5){ cls="warn"; label="🟡 やや長め"; lvl=1; }
   else if(ratio>=0.5){ cls="good"; label="🟢 いい塩梅"; }
   const bar = document.getElementById("quizBar");
   bar.classList.toggle("good", cls==="good");
   bar.classList.toggle("warn", cls==="warn");
   bar.classList.toggle("danger", cls==="danger");
-  document.getElementById("quizBarFill").style.width = Math.min(ratio/1.5,1)*100 + "%";  // 1.5Tでバー満タン
+  document.getElementById("quizBarFill").style.width = Math.min(ratio/2.5,1)*100 + "%";  // 2.5Tでバー満タン
   const t = document.getElementById("quizTime");
   t.classList.toggle("good", cls==="good");
   t.classList.toggle("warn", cls==="warn");
