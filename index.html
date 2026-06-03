@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="theme-color" content="#7b2ff7" />
+<title>面接クエスト 🎯</title>
+<style>
+  :root{
+    --bg1:#f5f0ff;
+    --bg2:#eaf3ff;
+    --bg3:#fff0f6;
+    --card:#ffffff;
+    --ink:#2b2440;
+    --ink-soft:#6a6483;
+    --accent:#7b2ff7;
+    --accent2:#2575fc;
+    --gold1:#ffd86b;
+    --gold2:#ff9f43;
+    --shadow:0 8px 24px rgba(80,50,160,.14);
+    --radius:18px;
+    --c-self:#3a86ff;
+    --c-reason:#ff8c42;
+    --c-motiv:#2ecc71;
+    --c-pr:#9b5de5;
+    --c-reverse:#ff5d8f;
+    --c-other:#8d99ae;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI",system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    background:linear-gradient(160deg,var(--bg1),var(--bg2) 55%,var(--bg3));
+    background-attachment:fixed;
+    min-height:100vh;
+    line-height:1.6;
+  }
+  .wrap{max-width:520px;margin:0 auto;padding:0 14px 110px;}
+
+  /* ===== ヘッダー / 進捗 ===== */
+  header{
+    position:sticky;top:0;z-index:30;
+    margin:0 -14px 14px;
+    padding:14px 16px 16px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff;
+    border-radius:0 0 26px 26px;
+    box-shadow:0 10px 24px rgba(90,50,200,.28);
+  }
+  .title-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .title{display:flex;align-items:center;gap:8px;font-size:1.25rem;font-weight:800;letter-spacing:.02em;}
+  .title .logo{font-size:1.5rem;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25));}
+  .gear{
+    flex:0 0 auto;width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;
+    background:rgba(255,255,255,.2);color:#fff;font-size:1.2rem;backdrop-filter:blur(4px);transition:transform .12s,background .2s;
+  }
+  .gear:active{transform:scale(.9) rotate(40deg);}
+  .rank{margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .rank .badge{
+    font-weight:800;font-size:.95rem;display:flex;align-items:center;gap:6px;
+    background:rgba(255,255,255,.18);padding:6px 12px;border-radius:999px;backdrop-filter:blur(4px);
+  }
+  .rank .count{font-size:.8rem;font-weight:700;opacity:.95;}
+  .bar{margin-top:10px;height:12px;border-radius:999px;background:rgba(255,255,255,.25);overflow:hidden;}
+  .bar > i{
+    display:block;height:100%;width:0%;border-radius:999px;
+    background:linear-gradient(90deg,var(--gold1),var(--gold2));
+    transition:width .6s cubic-bezier(.2,.8,.2,1);
+    box-shadow:0 0 12px rgba(255,180,60,.7);
+  }
+  .cheer{margin-top:8px;font-size:.76rem;text-align:center;opacity:.95;font-weight:700;min-height:1.1em;}
+
+  /* ===== 模擬試験スタート ===== */
+  .quiz-start{
+    width:100%;border:none;cursor:pointer;font-weight:800;font-size:1.02rem;padding:15px;border-radius:16px;
+    background:linear-gradient(135deg,#ff8c42,#ff5d8f);color:#fff;
+    box-shadow:0 8px 20px rgba(255,90,120,.4);transition:transform .12s;display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .quiz-start:active{transform:scale(.97);}
+
+  /* ===== ツールバー ===== */
+  .toolbar{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+  .search{width:100%;border:none;border-radius:14px;padding:12px 14px;font-size:.95rem;background:#fff;box-shadow:var(--shadow);color:var(--ink);}
+  .search:focus{outline:2px solid var(--accent);}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none;}
+  .chips::-webkit-scrollbar{display:none;}
+  .chip{flex:0 0 auto;border:none;cursor:pointer;font-weight:700;font-size:.82rem;padding:8px 14px;border-radius:999px;background:#fff;color:var(--ink-soft);box-shadow:0 2px 8px rgba(80,50,160,.10);transition:transform .12s,background .2s,color .2s;}
+  .chip:active{transform:scale(.94);}
+  .chip.on{background:var(--ink);color:#fff;}
+  .chip .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle;}
+
+  /* ===== カード ===== */
+  #list{display:flex;flex-direction:column;gap:12px;}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;position:relative;border:2px solid transparent;transition:transform .12s,box-shadow .2s,border-color .3s;animation:pop .35s ease both;}
+  @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98);}to{opacity:1;transform:none;}}
+  .card.mastered{border-color:var(--gold1);box-shadow:0 8px 26px rgba(255,170,40,.32);}
+  .card.mastered::after{content:"👑";position:absolute;top:-10px;right:10px;font-size:1.4rem;transform:rotate(12deg);filter:drop-shadow(0 2px 3px rgba(0,0,0,.2));animation:pop .4s ease;}
+  .q-row{display:flex;align-items:flex-start;gap:10px;padding:14px 14px;cursor:pointer;}
+  .cat-tag{flex:0 0 auto;font-size:.66rem;font-weight:800;color:#fff;padding:4px 9px;border-radius:999px;margin-top:2px;white-space:nowrap;}
+  .q-text{flex:1;font-weight:700;font-size:.98rem;}
+  .chev{flex:0 0 auto;color:var(--ink-soft);transition:transform .3s;margin-top:2px;font-size:1rem;}
+  .card.open .chev{transform:rotate(180deg);}
+  .answer-wrap{max-height:0;overflow:hidden;transition:max-height .35s ease;}
+  .card.open .answer-wrap{max-height:1400px;}
+  .answer{padding:0 14px 14px;color:var(--ink);font-size:.92rem;white-space:pre-wrap;border-top:1px dashed #e7e1f5;padding-top:12px;}
+  .card-actions{display:flex;gap:8px;padding:0 14px 14px;flex-wrap:wrap;}
+  .mini{border:none;cursor:pointer;font-weight:700;font-size:.8rem;padding:8px 12px;border-radius:10px;background:#f1ecff;color:var(--accent);transition:transform .1s,background .2s;}
+  .mini:active{transform:scale(.93);}
+  .mini.master{background:linear-gradient(135deg,var(--gold1),var(--gold2));color:#5a3a00;}
+  .mini.master.on{background:#e9f9ef;color:#1c8a4a;}
+  .mini.del{background:#ffeef0;color:#e5446d;margin-left:auto;}
+  .empty{text-align:center;color:var(--ink-soft);padding:48px 20px;font-weight:700;}
+  .empty .big{font-size:2.4rem;display:block;margin-bottom:8px;}
+
+  /* ===== FAB ===== */
+  .fab{position:fixed;right:18px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:40;width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;font-size:1.9rem;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 10px 24px rgba(90,50,200,.45);transition:transform .12s;}
+  .fab:active{transform:scale(.9);}
+
+  /* ===== モーダル共通 ===== */
+  .overlay{position:fixed;inset:0;z-index:50;background:rgba(40,25,80,.45);backdrop-filter:blur(3px);display:none;align-items:flex-end;justify-content:center;}
+  .overlay.show{display:flex;animation:fade .2s ease;}
+  @keyframes fade{from{opacity:0;}to{opacity:1;}}
+  .sheet{width:100%;max-width:520px;background:#fff;border-radius:22px 22px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.2);animation:slideup .3s cubic-bezier(.2,.9,.2,1);max-height:92vh;overflow:auto;}
+  @keyframes slideup{from{transform:translateY(100%);}to{transform:none;}}
+  .sheet h2{margin:4px 0 14px;font-size:1.1rem;display:flex;align-items:center;gap:8px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:.8rem;font-weight:800;color:var(--ink-soft);margin-bottom:6px;}
+  .field input,.field textarea,.field select{width:100%;border:2px solid #ece6fa;border-radius:12px;padding:11px 12px;font-size:.95rem;font-family:inherit;color:var(--ink);background:#faf8ff;}
+  .field textarea{min-height:120px;resize:vertical;line-height:1.6;}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--accent);background:#fff;}
+  .catpick{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
+  .catpick button{border:2px solid #ece6fa;background:#fff;cursor:pointer;font-weight:700;font-size:.8rem;padding:8px 12px;border-radius:999px;color:var(--ink-soft);transition:all .15s;}
+  .catpick button.on{color:#fff;border-color:transparent;}
+  .row-btn{display:flex;gap:10px;margin-top:6px;}
+  .btn{flex:1;border:none;cursor:pointer;font-weight:800;font-size:.95rem;padding:13px;border-radius:14px;transition:transform .1s;}
+  .btn:active{transform:scale(.97);}
+  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+  .btn.ghost{background:#f1ecff;color:var(--accent);}
+  .hint{font-size:.76rem;color:var(--ink-soft);margin:-2px 0 14px;}
+  .seg{display:flex;background:#f1ecff;border-radius:12px;padding:4px;margin-bottom:14px;}
+  .seg button{flex:1;border:none;background:transparent;cursor:pointer;font-weight:800;font-size:.85rem;padding:9px;border-radius:9px;color:var(--accent);}
+  .seg button.on{background:#fff;box-shadow:0 2px 6px rgba(80,50,160,.15);}
+  .timeunit{display:flex;align-items:center;gap:8px;}
+  .timeunit input{width:110px;}
+
+  /* ===== 模擬試験オーバーレイ ===== */
+  .overlay.quiz{align-items:stretch;background:rgba(30,18,60,.6);}
+  .quizsheet{
+    width:100%;max-width:520px;margin:0 auto;background:linear-gradient(165deg,#fbf8ff,#eef4ff);
+    display:flex;flex-direction:column;padding:16px 18px calc(18px + env(safe-area-inset-bottom));
+    animation:fade .25s ease;
+  }
+  .quiz-top{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .quiz-top #quizCount{font-weight:800;color:var(--ink);}
+  .quiz-top .cat-tag{font-size:.7rem;}
+  .quiz-top .spacer{flex:1;}
+  .quiz-close{width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;background:#fff;color:var(--ink-soft);font-size:1.1rem;font-weight:800;box-shadow:var(--shadow);}
+  .quiz-timerbar{position:relative;height:16px;border-radius:999px;background:#e7e0f5;overflow:hidden;margin-bottom:8px;}
+  .quiz-timerbar::before,.quiz-timerbar::after{content:"";position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,.85);z-index:2;}
+  .quiz-timerbar::before{left:33.33%;}  /* 目安の50%地点（=「いい塩梅」の始まり） */
+  .quiz-timerbar::after{left:66.66%;}   /* 目安の100%地点（=「やや長め」の始まり） */
+  .quiz-timerbar > i{display:block;height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#74c0fc,#4dabf7);transition:width 1s linear,background .3s;}
+  .quiz-timerbar.good > i{background:linear-gradient(90deg,#2ecc71,#26a65b);}
+  .quiz-timerbar.warn > i{background:linear-gradient(90deg,#ffd43b,#ff9f43);}
+  .quiz-timerbar.danger > i{background:linear-gradient(90deg,#ff6b6b,#e5446d);}
+  .quiz-time{text-align:center;font-weight:800;font-size:1.05rem;color:var(--ink-soft);margin-bottom:6px;}
+  .quiz-time.good{color:#1c8a4a;}
+  .quiz-time.warn{color:#e67e22;}
+  .quiz-time.danger{color:#e5446d;}
+  .quiz-q{
+    flex:0 0 auto;background:#fff;border-radius:18px;box-shadow:var(--shadow);padding:24px 20px;
+    font-size:1.25rem;font-weight:800;line-height:1.7;color:var(--ink);margin-bottom:14px;min-height:140px;
+    display:flex;align-items:center;
+  }
+  .quiz-a{background:#f3fff7;border:2px solid #c8f0d6;border-radius:16px;padding:16px;white-space:pre-wrap;font-size:.95rem;margin-bottom:14px;animation:pop .3s ease;flex:1;overflow:auto;}
+  .quiz-a .lbl{display:block;font-size:.75rem;font-weight:800;color:#1c8a4a;margin-bottom:6px;}
+  .quiz-actions{margin-top:auto;}
+  .quiz-tip{font-size:.74rem;color:var(--ink-soft);text-align:center;margin-bottom:10px;font-weight:700;}
+
+  .toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-weight:700;font-size:.85rem;z-index:80;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:70;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title-row">
+      <div class="title"><span class="logo">🎯</span><span>面接クエスト</span></div>
+      <button class="gear" id="settingsBtn" aria-label="設定">⚙️</button>
+    </div>
+    <div class="rank">
+      <span class="badge" id="rankBadge">🌱 面接エントリー</span>
+      <span class="count" id="rankCount">0 / 0 マスター</span>
+    </div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="cheer" id="cheer"></div>
+  </header>
+
+  <div class="toolbar">
+    <button class="quiz-start" id="quizStartBtn">🎮 模擬試験スタート</button>
+    <input class="search" id="search" type="search" placeholder="🔍 質問・回答を検索…" autocomplete="off" />
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<button class="fab" id="addBtn" aria-label="質問を追加">＋</button>
+
+<!-- 追加・編集シート -->
+<div class="overlay" id="editOverlay">
+  <div class="sheet">
+    <h2 id="editTitle">✏️ 質問を追加</h2>
+    <div class="field">
+      <label>カテゴリ</label>
+      <div class="catpick" id="catPick"></div>
+    </div>
+    <div class="field">
+      <label>質問（Q）</label>
+      <textarea id="qInput" placeholder="例：簡単に自己紹介をお願いします。" style="min-height:70px;"></textarea>
+    </div>
+    <div class="field">
+      <label>あなたの回答（A）</label>
+      <textarea id="aInput" placeholder="ここに回答を貼り付け／入力してください。改行もそのまま表示されます。"></textarea>
+    </div>
+    <div class="row-btn">
+      <button class="btn ghost" id="editCancel">キャンセル</button>
+      <button class="btn primary" id="editSave">保存する 💾</button>
+    </div>
+  </div>
+</div>
+
+<!-- 設定シート -->
+<div class="overlay" id="settingsOverlay">
+  <div class="sheet">
+    <h2>⚙️ 設定</h2>
+    <div class="field">
+      <label>⏱ 模擬試験の目安時間（1問あたり）</label>
+      <div class="catpick" id="timePick"></div>
+      <div class="timeunit"><input id="timeInput" type="number" min="5" max="600" /> <span>秒</span></div>
+    </div>
+    <div class="field">
+      <label>🔄 データの移行（PC ↔ スマホ）</label>
+      <p class="hint">入力した想定問答を、別の端末へ引き継げます。</p>
+      <div class="row-btn">
+        <button class="btn ghost" id="openExport">📤 書き出し</button>
+        <button class="btn ghost" id="openImport">📥 取り込み</button>
+      </div>
+    </div>
+    <button class="btn primary" id="settingsClose">閉じる</button>
+  </div>
+</div>
+
+<!-- 移行シート -->
+<div class="overlay" id="dataOverlay">
+  <div class="sheet">
+    <h2 id="dataTitle">🔄 データの移行</h2>
+    <div class="seg">
+      <button id="segExport" class="on">📤 書き出し</button>
+      <button id="segImport">📥 取り込み</button>
+    </div>
+    <div id="paneExport">
+      <p class="hint">下のデータを「コピー」して自分宛のLINE/メール/メモに貼り付け → スマホで開いて「取り込み」してください。ファイル保存もできます。</p>
+      <div class="field">
+        <label>あなたのデータ（JSON）</label>
+        <textarea id="exportArea" readonly></textarea>
+      </div>
+      <div class="row-btn">
+        <button class="btn ghost" id="copyBtn">📋 コピー</button>
+        <button class="btn primary" id="downloadBtn">💾 ファイル保存</button>
+      </div>
+    </div>
+    <div id="paneImport" style="display:none;">
+      <p class="hint">書き出したJSONを貼り付け、またはファイルを選んで取り込みます。「追加」は今のデータに足し、「全置換」は丸ごと入れ替えます。</p>
+      <div class="field">
+        <label>JSONを貼り付け</label>
+        <textarea id="importArea" placeholder='{"app":"面接クエスト", ... }'></textarea>
+      </div>
+      <div class="field">
+        <label>またはファイルから</label>
+        <input type="file" id="importFile" accept="application/json,.json,text/plain" />
+      </div>
+      <div class="row-btn">
+        <button class="btn ghost" id="importMerge">➕ 追加で取込</button>
+        <button class="btn primary" id="importReplace">♻️ 全置換で取込</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 模擬試験オーバーレイ -->
+<div class="overlay quiz" id="quizOverlay">
+  <div class="quizsheet">
+    <div class="quiz-top">
+      <span id="quizCount">第1問</span>
+      <span class="cat-tag" id="quizCat" style="background:var(--c-other)">—</span>
+      <span class="spacer"></span>
+      <button class="quiz-close" id="quizClose" aria-label="終了">✕</button>
+    </div>
+    <div class="quiz-timerbar" id="quizBar"><i id="quizBarFill"></i></div>
+    <div class="quiz-time" id="quizTime">--</div>
+    <div class="quiz-q" id="quizQ"></div>
+    <div class="quiz-a" id="quizA" style="display:none;"><span class="lbl">あなたの回答（模範）</span><span id="quizAText"></span></div>
+    <div class="quiz-actions">
+      <p class="quiz-tip" id="quizTip">声に出して答えてみよう。時間内に言い切れるかな？</p>
+      <div class="row-btn">
+        <button class="btn ghost" id="quizReveal">💡 回答を見る</button>
+        <button class="btn primary" id="quizNext" style="display:none;">⏭ 次の問題へ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<canvas id="confetti"></canvas>
+
+<script>
+"use strict";
+/* ===================== データ層 ===================== */
+const STORE_KEY = "mensetsu_quest_v1";
+const SET_KEY   = "mensetsu_quest_settings_v1";
+
+const CATS = [
+  {id:"self",   label:"自己紹介",  color:"var(--c-self)"},
+  {id:"reason", label:"転職理由",  color:"var(--c-reason)"},
+  {id:"motiv",  label:"志望動機",  color:"var(--c-motiv)"},
+  {id:"pr",     label:"自己PR",    color:"var(--c-pr)"},
+  {id:"reverse",label:"逆質問",    color:"var(--c-reverse)"},
+  {id:"other",  label:"その他",    color:"var(--c-other)"},
+];
+const catOf = id => CATS.find(c=>c.id===id) || CATS[CATS.length-1];
+
+const SAMPLE = [
+  {id:"s1", cat:"self", q:"簡単に自己紹介をお願いします。",
+   a:"（例）○○と申します。前職のニッペコ株式会社では5年間、◇◇の業務を担当し、△△に取り組んでまいりました。本日はどうぞよろしくお願いいたします。\n\n※ここをあなたの回答に書き換えてください。"},
+  {id:"s2", cat:"reason", q:"なぜ5年間勤めたニッペコを辞めようと思ったのですか？",
+   a:"（例）前職で◇◇を経験する中で、もっと△△に踏み込みたいという思いが強くなりました。前向きな理由で語り、前職の不満ではなく『次に実現したいこと』に着地させるのがコツです。"},
+  {id:"s3", cat:"reason", q:"潤滑剤の会社から光学分野の当社へ。畑違いに感じますが、その点はどうお考えですか？",
+   a:"（例）一見異なる分野ですが、◇◇という共通点があります。前職で培った△△は御社でも活かせると考えています。\n\n★最重要ポイント。『なぜニッペコ→なぜナルックス』が一本の線でつながる物語を用意。"},
+  {id:"s4", cat:"motiv", q:"当社を志望する理由を教えてください。",
+   a:"（例）御社の◇◇という事業／姿勢に強く惹かれました。特に△△の点で、自分の□□を活かして貢献したいと考えています。\n\n※会社HPで調べた具体的な事実を1つ織り込むと説得力が増します。"},
+  {id:"s5", cat:"pr", q:"前職での一番の成果を教えてください。",
+   a:"（例）◇◇という課題に対し、△△という行動をとり、□□という成果（数字があれば数字で）を出しました。\n\n※STAR（状況→課題→行動→結果）で簡潔に。"},
+  {id:"s6", cat:"reverse", q:"最後に、何か質問はありますか？（逆質問）",
+   a:"（例）入社までに勉強しておくべきことはありますか？／○○の業務で活躍されている方に共通する点はありますか？\n\n★『特にありません』はNG。熱意が伝わる質問を2〜3個ストック。"},
+
+  /* ▼ ナルックス最終面接で「絶対に聞きたい」想定質問（面接官の狙い＋回答のヒント付き／要編集） */
+  {id:"n1", cat:"motiv", q:"数ある光学部品メーカーの中で、なぜ当社（ナルックス）を志望されるのですか？",
+   a:"★面接官の狙い：志望の本気度と、企業理解の深さ。\n（ヒント）マイクロレンズアレイや回折光学素子など“ここにしかない”超精密光学、すばる望遠鏡や医療を支える技術——ナルックスならではの一点を挙げ、自分の価値観と結びつける。『光学メーカーならどこでも』に聞こえないように。"},
+  {id:"n2", cat:"motiv", q:"当社は一般的な知名度が高い会社ではありません。何をきっかけに当社を知り、どこに魅力を感じましたか？",
+   a:"★面接官の狙い：ニッチなBtoB企業ゆえ、表面的な志望でないかの確認。\n（ヒント）知ったきっかけ＋具体的に惹かれた技術や姿勢（「光を突き詰める飽くなき探求心」「ここにしかないテクノロジー」）を自分の言葉で。"},
+  {id:"n3", cat:"pr", q:"潤滑剤の分野から未経験の光学分野へ。前職（ニッペコ）での経験で、当社に最も活かせると思うものは何ですか？",
+   a:"★面接官の狙い：異分野でも貢献できる根拠（再現性のある強み）。\n（ヒント）製品知識そのものではなく、超精密・品質へのこだわり／製造現場での課題解決／粘り強さなど、光学のものづくりに通じる“普遍的な強み”に翻訳する。"},
+  {id:"n4", cat:"reason", q:"前職には5年勤められました。当社では腰を据えて技術を究めてほしいのですが、長く働けると思う理由を聞かせてください。",
+   a:"★面接官の狙い：定着性・本気度（早期離職しないか）。\n（ヒント）転職理由と矛盾しない形で、ナルックスの環境が“長く突き詰められる場”である点に触れ、覚悟を示す。"},
+  {id:"n5", cat:"pr", q:"『光を突き詰める、飽くなき探求心』を当社は大切にしています。これまで何かを徹底的に突き詰めた経験を教えてください。",
+   a:"★面接官の狙い：カルチャーフィット（探求心・こだわり）。\n（ヒント）仕事でも私生活でも可。STAR（状況→課題→行動→結果）で簡潔に。“なぜそこまでやれたのか”の動機まで語れると価値観が伝わる。"},
+  {id:"n6", cat:"other", q:"入社できたら、どんなことに挑戦したいですか。5年後・10年後、どうなっていたいか教えてください。",
+   a:"★面接官の狙い：キャリアビジョンと、当社での活躍イメージ。\n（ヒント）背伸びしすぎず、まず現場で何を吸収し将来どう貢献したいか。医療・センシング・サステナブルなど当社の事業と接続できると◎。"},
+  {id:"n7", cat:"other", q:"現在の他社の選考状況と、当社の志望順位を率直に教えてください。",
+   a:"★面接官の狙い：内定辞退リスクの確認（最終面接の定番）。\n（ヒント）正直さと第一志望の熱意の両立を。第一志望と言うなら理由を添える。嘘は見抜かれるので誠実に。"},
+  {id:"n8", cat:"other", q:"最後に、当社で働きたいという思いを、改めてあなたの言葉で聞かせてください。",
+   a:"★面接官の狙い：熱意・人柄の最終確認。\n（ヒント）短くてよいので、自分の価値観×ナルックスで実現したいことを自分の言葉で。暗記の棒読みにしない。"},
+];
+
+let cards = load();
+let settings = loadSettings();
+let filter = "all";
+let keyword = "";
+const openIds = new Set();
+let editingId = null;
+let pickedCat = "self";
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw){ return SAMPLE.map(c=>({...c, mastered:false})); }
+    const data = JSON.parse(raw);
+    if(Array.isArray(data.cards)) return data.cards.map(normalize);
+    return [];
+  }catch(e){ return SAMPLE.map(c=>({...c, mastered:false})); }
+}
+function normalize(c){
+  return {
+    id: c.id || uid(),
+    cat: CATS.some(x=>x.id===c.cat) ? c.cat : "other",
+    q: String(c.q||""),
+    a: String(c.a||""),
+    mastered: !!c.mastered,
+  };
+}
+function save(){
+  localStorage.setItem(STORE_KEY, JSON.stringify({app:"面接クエスト", version:1, savedAt:new Date().toISOString(), cards}));
+  renderRank();
+}
+function clampNum(n,a,b){ n=Number(n)||0; return Math.max(a,Math.min(b,n)); }
+function loadSettings(){
+  try{ const r=localStorage.getItem(SET_KEY); if(r){ const s=JSON.parse(r); return {quizSeconds:clampNum(s.quizSeconds||60,5,600)}; } }catch(e){}
+  return {quizSeconds:60};
+}
+function saveSettings(){ localStorage.setItem(SET_KEY, JSON.stringify(settings)); }
+function uid(){ return "c"+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+/* ===================== 表示ヘルパ ===================== */
+function esc(s){ return String(s).replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+
+const RANKS = [
+  {min:0,   label:"🌱 面接エントリー", cheer:"まずは1問ずつ。あせらず行こう！"},
+  {min:.01, label:"📖 準備中",         cheer:"スタート切れた！その調子！"},
+  {min:.25, label:"💪 成長中",         cheer:"いいペース！声に出して練習しよう。"},
+  {min:.5,  label:"🔥 面接ファイター",  cheer:"折り返し突破！自信が形になってきた。"},
+  {min:.75, label:"⭐ あと一歩！",      cheer:"あと少し！本番でも落ち着いて。"},
+  {min:1,   label:"👑 面接マスター",    cheer:"完璧！あなたなら大丈夫。笑顔で行こう🌸"},
+];
+function rankFor(ratio){ let r=RANKS[0]; for(const x of RANKS){ if(ratio>=x.min) r=x; } return r; }
+
+/* ===================== レンダリング ===================== */
+const listEl = document.getElementById("list");
+const chipsEl = document.getElementById("chips");
+
+function renderChips(){
+  const items = [{id:"all",label:"すべて",color:"var(--ink)"}, ...CATS];
+  chipsEl.innerHTML = items.map(c=>{
+    const on = filter===c.id ? "on":"";
+    const dot = c.id==="all" ? "" : `<span class="dot" style="background:${c.color}"></span>`;
+    const n = c.id==="all" ? cards.length : cards.filter(x=>x.cat===c.id).length;
+    return `<button class="chip ${on}" data-filter="${c.id}">${dot}${esc(c.label)} (${n})</button>`;
+  }).join("");
+}
+function visibleCards(){
+  const k = keyword.trim().toLowerCase();
+  return cards.filter(c=>{
+    if(filter!=="all" && c.cat!==filter) return false;
+    if(k && !(c.q.toLowerCase().includes(k) || c.a.toLowerCase().includes(k))) return false;
+    return true;
+  });
+}
+function renderList(){
+  const vis = visibleCards();
+  if(vis.length===0){
+    listEl.innerHTML = `<div class="empty"><span class="big">🗒️</span>${cards.length===0?"まだ質問がありません。<br>右下の＋から追加しよう！":"条件に合う質問がありません。"}</div>`;
+    return;
+  }
+  listEl.innerHTML = vis.map(c=>{
+    const cat = catOf(c.cat);
+    const open = openIds.has(c.id) ? "open":"";
+    const mastered = c.mastered ? "mastered":"";
+    return `
+    <div class="card ${open} ${mastered}" data-id="${c.id}">
+      <div class="q-row" data-action="toggle">
+        <span class="cat-tag" style="background:${cat.color}">${esc(cat.label)}</span>
+        <span class="q-text">${esc(c.q)}</span>
+        <span class="chev">▾</span>
+      </div>
+      <div class="answer-wrap"><div class="answer">${esc(c.a)||"<span style='color:#aaa'>（回答が未入力です）</span>"}</div>
+        <div class="card-actions">
+          <button class="mini master ${c.mastered?"on":""}" data-action="master">${c.mastered?"✅ マスター済み":"⭐ マスターした！"}</button>
+          <button class="mini" data-action="edit">✏️ 編集</button>
+          <button class="mini del" data-action="delete">🗑️ 削除</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+function renderRank(){
+  const total = cards.length;
+  const done = cards.filter(c=>c.mastered).length;
+  const ratio = total? done/total : 0;
+  const r = rankFor(ratio);
+  document.getElementById("rankBadge").textContent = r.label;
+  document.getElementById("rankCount").textContent = `${done} / ${total} マスター`;
+  document.getElementById("barFill").style.width = Math.round(ratio*100)+"%";
+  document.getElementById("cheer").textContent = r.cheer;
+}
+function renderAll(){ renderChips(); renderList(); renderRank(); }
+
+/* ===================== カード操作 ===================== */
+listEl.addEventListener("click", e=>{
+  const actEl = e.target.closest("[data-action]");
+  const cardEl = e.target.closest(".card");
+  if(!cardEl) return;
+  const id = cardEl.dataset.id;
+  const action = actEl ? actEl.dataset.action : null;
+  if(action==="toggle"){
+    if(openIds.has(id)) openIds.delete(id); else openIds.add(id);
+    cardEl.classList.toggle("open");
+  }else if(action==="master"){
+    const c = cards.find(x=>x.id===id);
+    c.mastered = !c.mastered;
+    save(); renderList();
+    if(c.mastered){
+      toast("マスター！ナイス💪"); burstConfetti();
+      if(cards.length && cards.every(x=>x.mastered)) setTimeout(()=>{toast("全問マスター！自信を持って🌸");burstConfetti(true);},400);
+    }
+  }else if(action==="edit"){
+    openEdit(id);
+  }else if(action==="delete"){
+    const c = cards.find(x=>x.id===id);
+    if(confirm("この質問を削除しますか？\n\n"+c.q)){
+      cards = cards.filter(x=>x.id!==id); openIds.delete(id);
+      save(); renderAll(); toast("削除しました");
+    }
+  }
+});
+chipsEl.addEventListener("click", e=>{
+  const b = e.target.closest("[data-filter]"); if(!b) return;
+  filter = b.dataset.filter; renderChips(); renderList();
+});
+document.getElementById("search").addEventListener("input", e=>{ keyword = e.target.value; renderList(); });
+
+/* ===================== 追加・編集 ===================== */
+const editOverlay = document.getElementById("editOverlay");
+const catPickEl = document.getElementById("catPick");
+function renderCatPick(){
+  catPickEl.innerHTML = CATS.map(c=>{
+    const on = pickedCat===c.id;
+    return `<button data-cat="${c.id}" class="${on?"on":""}" style="${on?`background:${c.color}`:""}">${esc(c.label)}</button>`;
+  }).join("");
+}
+catPickEl.addEventListener("click", e=>{ const b=e.target.closest("[data-cat]"); if(!b) return; pickedCat=b.dataset.cat; renderCatPick(); });
+function openEdit(id){
+  editingId = id || null;
+  const c = id ? cards.find(x=>x.id===id) : null;
+  document.getElementById("editTitle").textContent = id ? "✏️ 質問を編集" : "✏️ 質問を追加";
+  pickedCat = c ? c.cat : (filter!=="all"?filter:"self");
+  document.getElementById("qInput").value = c ? c.q : "";
+  document.getElementById("aInput").value = c ? c.a : "";
+  renderCatPick(); editOverlay.classList.add("show");
+  setTimeout(()=>document.getElementById("qInput").focus(),250);
+}
+function closeEdit(){ editOverlay.classList.remove("show"); editingId=null; }
+document.getElementById("addBtn").addEventListener("click", ()=>openEdit(null));
+document.getElementById("editCancel").addEventListener("click", closeEdit);
+editOverlay.addEventListener("click", e=>{ if(e.target===editOverlay) closeEdit(); });
+document.getElementById("editSave").addEventListener("click", ()=>{
+  const q = document.getElementById("qInput").value.trim();
+  const a = document.getElementById("aInput").value;
+  if(!q){ toast("質問を入力してください"); return; }
+  if(editingId){
+    const c = cards.find(x=>x.id===editingId); c.q=q; c.a=a; c.cat=pickedCat;
+  }else{
+    const nc = {id:uid(), cat:pickedCat, q, a, mastered:false};
+    cards.unshift(nc); openIds.add(nc.id);
+  }
+  save(); renderAll(); closeEdit();
+  toast(editingId?"保存しました ✨":"追加しました ✨");
+});
+
+/* ===================== 設定 ===================== */
+const settingsOverlay = document.getElementById("settingsOverlay");
+const timePickEl = document.getElementById("timePick");
+const timeInput = document.getElementById("timeInput");
+const TIME_PRESETS = [30,60,90,120];
+function renderTimePick(){
+  timePickEl.innerHTML = TIME_PRESETS.map(s=>{
+    const on = settings.quizSeconds===s;
+    return `<button data-sec="${s}" class="${on?"on":""}" style="${on?"background:var(--accent)":""}">${s}秒</button>`;
+  }).join("");
+  timeInput.value = settings.quizSeconds;
+}
+timePickEl.addEventListener("click", e=>{
+  const b=e.target.closest("[data-sec]"); if(!b) return;
+  settings.quizSeconds = Number(b.dataset.sec); saveSettings(); renderTimePick();
+});
+timeInput.addEventListener("change", ()=>{
+  settings.quizSeconds = clampNum(timeInput.value,5,600); saveSettings(); renderTimePick();
+});
+function openSettings(){ renderTimePick(); settingsOverlay.classList.add("show"); }
+function closeSettings(){ settingsOverlay.classList.remove("show"); }
+document.getElementById("settingsBtn").addEventListener("click", openSettings);
+document.getElementById("settingsClose").addEventListener("click", closeSettings);
+settingsOverlay.addEventListener("click", e=>{ if(e.target===settingsOverlay) closeSettings(); });
+document.getElementById("openExport").addEventListener("click", ()=>{ closeSettings(); openData("export"); });
+document.getElementById("openImport").addEventListener("click", ()=>{ closeSettings(); openData("import"); });
+
+/* ===================== 移行 ===================== */
+const dataOverlay = document.getElementById("dataOverlay");
+function openData(mode){ dataOverlay.classList.add("show"); switchPane(mode||"export"); }
+function closeData(){ dataOverlay.classList.remove("show"); }
+function switchPane(mode){
+  const exp = mode==="export";
+  document.getElementById("segExport").classList.toggle("on",exp);
+  document.getElementById("segImport").classList.toggle("on",!exp);
+  document.getElementById("paneExport").style.display = exp?"block":"none";
+  document.getElementById("paneImport").style.display = exp?"none":"block";
+  if(exp){
+    document.getElementById("exportArea").value =
+      JSON.stringify({app:"面接クエスト", version:1, exportedAt:new Date().toISOString(), cards}, null, 2);
+  }
+}
+document.getElementById("segExport").addEventListener("click", ()=>switchPane("export"));
+document.getElementById("segImport").addEventListener("click", ()=>switchPane("import"));
+dataOverlay.addEventListener("click", e=>{ if(e.target===dataOverlay) closeData(); });
+document.getElementById("copyBtn").addEventListener("click", async ()=>{
+  const txt = document.getElementById("exportArea").value;
+  try{ await navigator.clipboard.writeText(txt); toast("コピーしました📋 スマホに送ろう"); }
+  catch(e){ const ta=document.getElementById("exportArea"); ta.focus(); ta.select(); try{ document.execCommand("copy"); toast("コピーしました📋"); }catch(_){ toast("長押しでコピーしてください"); } }
+});
+document.getElementById("downloadBtn").addEventListener("click", ()=>{
+  const txt = document.getElementById("exportArea").value;
+  const blob = new Blob([txt], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "mensetsu-quest-"+new Date().toISOString().slice(0,10)+".json";
+  a.click(); URL.revokeObjectURL(a.href); toast("ファイルを保存しました💾");
+});
+function doImport(replace){
+  let txt = document.getElementById("importArea").value.trim();
+  if(!txt){ toast("JSONを貼り付けるかファイルを選んでください"); return; }
+  let incoming;
+  try{ const data = JSON.parse(txt); incoming = Array.isArray(data) ? data : data.cards; if(!Array.isArray(incoming)) throw 0; }
+  catch(e){ toast("読み込めませんでした（JSONを確認）"); return; }
+  const norm = incoming.map(normalize).map(c=>({...c, id:uid()}));
+  if(replace){ if(!confirm("今のデータを全て置き換えます。よろしいですか？")) return; cards = norm; }
+  else{ cards = cards.concat(norm); }
+  save(); renderAll(); closeData();
+  toast((replace?"全置換":"追加")+`で ${norm.length} 件取り込みました ✨`);
+}
+document.getElementById("importMerge").addEventListener("click", ()=>doImport(false));
+document.getElementById("importReplace").addEventListener("click", ()=>doImport(true));
+document.getElementById("importFile").addEventListener("change", e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{ document.getElementById("importArea").value = r.result; toast("ファイルを読み込みました。取込ボタンを押してね"); };
+  r.readAsText(f);
+});
+
+/* ===================== 模擬試験 ===================== */
+const quizOverlay = document.getElementById("quizOverlay");
+const quiz = {queue:[], idx:0, count:0, current:null, timer:null, elapsed:0, warned:false};
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function startQuiz(){
+  if(cards.length===0){ toast("先に質問を追加してください"); return; }
+  quiz.queue = shuffle(cards.map(c=>c.id)); quiz.idx=0; quiz.count=0;
+  quizOverlay.classList.add("show");
+  nextQuestion();
+}
+function nextQuestion(){
+  if(quiz.idx>=quiz.queue.length){ quiz.queue=shuffle(cards.map(c=>c.id)); quiz.idx=0; }
+  const id = quiz.queue[quiz.idx++];
+  const c = cards.find(x=>x.id===id);
+  if(!c){ if(quiz.queue.length) return nextQuestion(); else return closeQuiz(); }
+  quiz.count++; quiz.current=c;
+  const cat = catOf(c.cat);
+  document.getElementById("quizCount").textContent = "第"+quiz.count+"問";
+  const ct = document.getElementById("quizCat"); ct.textContent = cat.label; ct.style.background = cat.color;
+  document.getElementById("quizQ").textContent = c.q;
+  document.getElementById("quizAText").textContent = c.a || "（回答が未入力です）";
+  document.getElementById("quizA").style.display = "none";
+  document.getElementById("quizReveal").style.display = "";
+  document.getElementById("quizNext").style.display = "none";
+  document.getElementById("quizTip").textContent = "声に出して答えてみよう。時間が来ても止めず、最後まで言い切ろう。";
+  startTimer();
+}
+function fmtTime(s){ const m=Math.floor(s/60), ss=s%60; return m+":"+String(ss).padStart(2,"0"); }
+function startTimer(){
+  clearInterval(quiz.timer);
+  quiz.elapsed = 0; quiz.warned = 0;
+  updateTimerUI();
+  quiz.timer = setInterval(()=>{ quiz.elapsed++; updateTimerUI(); }, 1000);   // ストップウォッチ：自動では止めない
+}
+function updateTimerUI(){
+  const goal = settings.quizSeconds, el = quiz.elapsed;   // 目安時間。超えても止めない（ストップウォッチ）
+  const ratio = goal>0 ? el/goal : 0;
+  // 目安(T)を基準にした相対4ゾーン：〜0.5T 短め / 0.5〜1.0T いい塩梅 / 1.0〜1.5T やや長め / 1.5T〜 長い
+  let cls="", label="🔵 まだ短め", lvl=0;
+  if(ratio>=1.5){ cls="danger"; label="🔴 長い・巻こう"; lvl=2; }
+  else if(ratio>=1.0){ cls="warn"; label="🟡 やや長め"; lvl=1; }
+  else if(ratio>=0.5){ cls="good"; label="🟢 いい塩梅"; }
+  const bar = document.getElementById("quizBar");
+  bar.classList.toggle("good", cls==="good");
+  bar.classList.toggle("warn", cls==="warn");
+  bar.classList.toggle("danger", cls==="danger");
+  document.getElementById("quizBarFill").style.width = Math.min(ratio/1.5,1)*100 + "%";  // 1.5Tでバー満タン
+  const t = document.getElementById("quizTime");
+  t.classList.toggle("good", cls==="good");
+  t.classList.toggle("warn", cls==="warn");
+  t.classList.toggle("danger", cls==="danger");
+  t.textContent = "⏱ " + fmtTime(el) + " ・ " + label;
+  if(lvl>quiz.warned){                                 // ゾーンが上がった瞬間だけ軽く合図。話すのは止めない
+    quiz.warned = lvl;
+    if(navigator.vibrate) navigator.vibrate(lvl>=2?[80,40,80]:70);
+    document.getElementById("quizTip").textContent = lvl>=2
+      ? "そろそろ巻こう。要点を絞って締めに入って。"
+      : "目安に到達。あせらず、でも冗長にならないように。";
+  }
+}
+function revealAnswer(){
+  clearInterval(quiz.timer);
+  document.getElementById("quizTip").textContent = "この回答にかかった時間：" + fmtTime(quiz.elapsed) + "（面接は1問あたり1〜2分が目安）";
+  document.getElementById("quizA").style.display = "";
+  document.getElementById("quizReveal").style.display = "none";
+  document.getElementById("quizNext").style.display = "";
+}
+function closeQuiz(){ clearInterval(quiz.timer); quizOverlay.classList.remove("show"); }
+document.getElementById("quizStartBtn").addEventListener("click", startQuiz);
+document.getElementById("quizClose").addEventListener("click", closeQuiz);
+document.getElementById("quizReveal").addEventListener("click", revealAnswer);
+document.getElementById("quizNext").addEventListener("click", nextQuestion);
+
+/* ===================== トースト & 紙吹雪 ===================== */
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),1800);
+}
+const cv = document.getElementById("confetti");
+const ctx = cv.getContext("2d");
+function fitCanvas(){ cv.width=innerWidth; cv.height=innerHeight; }
+addEventListener("resize", fitCanvas); fitCanvas();
+function burstConfetti(big){
+  const colors=["#ffd86b","#ff9f43","#7b2ff7","#2575fc","#2ecc71","#ff5d8f"];
+  const N = big?160:70; const parts=[];
+  for(let i=0;i<N;i++){
+    parts.push({x:innerWidth/2+(Math.random()-.5)*120,y:innerHeight*0.32,vx:(Math.random()-.5)*9,vy:Math.random()*-9-4,g:0.28+Math.random()*0.12,s:6+Math.random()*7,rot:Math.random()*6.28,vr:(Math.random()-.5)*0.4,c:colors[i%colors.length],life:60+Math.random()*30});
+  }
+  let frame=0;
+  function step(){
+    ctx.clearRect(0,0,cv.width,cv.height); let alive=false;
+    for(const p of parts){
+      if(p.life<=0) continue; alive=true;
+      p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.life--;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.fillStyle=p.c; ctx.globalAlpha=Math.max(0,Math.min(1,p.life/20));
+      ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); ctx.restore();
+    }
+    frame++;
+    if(alive && frame<140) requestAnimationFrame(step); else ctx.clearRect(0,0,cv.width,cv.height);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ===================== 起動 ===================== */
+renderAll();
+</script>
+</body>
+</html>
