@@ -17,8 +17,6 @@
     --ink-soft:#6a6483;
     --accent:#7b2ff7;
     --accent2:#2575fc;
-    --gold1:#ffd86b;
-    --gold2:#ff9f43;
     --shadow:0 8px 24px rgba(80,50,160,.14);
     --radius:18px;
     --c-self:#3a86ff;
@@ -58,20 +56,7 @@
     background:rgba(255,255,255,.2);color:#fff;font-size:1.2rem;backdrop-filter:blur(4px);transition:transform .12s,background .2s;
   }
   .gear:active{transform:scale(.9) rotate(40deg);}
-  .rank{margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
-  .rank .badge{
-    font-weight:800;font-size:.95rem;display:flex;align-items:center;gap:6px;
-    background:rgba(255,255,255,.18);padding:6px 12px;border-radius:999px;backdrop-filter:blur(4px);
-  }
-  .rank .count{font-size:.8rem;font-weight:700;opacity:.95;}
-  .bar{margin-top:10px;height:12px;border-radius:999px;background:rgba(255,255,255,.25);overflow:hidden;}
-  .bar > i{
-    display:block;height:100%;width:0%;border-radius:999px;
-    background:linear-gradient(90deg,var(--gold1),var(--gold2));
-    transition:width .6s cubic-bezier(.2,.8,.2,1);
-    box-shadow:0 0 12px rgba(255,180,60,.7);
-  }
-  .cheer{margin-top:8px;font-size:.76rem;text-align:center;opacity:.95;font-weight:700;min-height:1.1em;}
+  .header-note{margin-top:10px;font-size:.82rem;font-weight:700;opacity:.95;}
 
   /* ===== 模擬試験スタート ===== */
   .action-row{display:flex;gap:10px;}
@@ -107,24 +92,34 @@
 
   /* ===== カード ===== */
   #list{display:flex;flex-direction:column;gap:12px;}
-  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;position:relative;border:2px solid transparent;transition:transform .12s,box-shadow .2s,border-color .3s;animation:pop .35s ease both;}
+  .card{position:relative;transition:transform .34s cubic-bezier(.18,1.25,.24,1),opacity .2s;animation:pop .35s ease both;will-change:transform;}
+  .card-inner{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;border:2px solid transparent;transition:box-shadow .2s,border-color .25s,transform .18s;}
   @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98);}to{opacity:1;transform:none;}}
-  .card.mastered{border-color:var(--gold1);box-shadow:0 8px 26px rgba(255,170,40,.32);}
-  .card.mastered::after{content:"👑";position:absolute;top:-10px;right:10px;font-size:1.4rem;transform:rotate(12deg);filter:drop-shadow(0 2px 3px rgba(0,0,0,.2));animation:pop .4s ease;}
+  @keyframes jiggleA{0%{transform:rotate(-.55deg) translateY(-.4px);}100%{transform:rotate(.55deg) translateY(.4px);}}
+  @keyframes jiggleB{0%{transform:rotate(.45deg) translateY(.5px);}100%{transform:rotate(-.45deg) translateY(-.5px);}}
   .q-row{display:flex;align-items:flex-start;gap:10px;padding:14px 14px;cursor:pointer;}
   .cat-tag{flex:0 0 auto;font-size:.66rem;font-weight:800;color:#fff;padding:4px 9px;border-radius:999px;margin-top:2px;white-space:nowrap;}
   .q-text{flex:1;font-weight:700;font-size:.98rem;}
-  .chev{flex:0 0 auto;color:var(--ink-soft);transition:transform .3s;margin-top:2px;font-size:1rem;}
-  .card.open .chev{transform:rotate(180deg);}
   .answer-wrap{max-height:0;overflow:hidden;transition:max-height .35s ease;}
   .card.open .answer-wrap{max-height:1400px;}
   .answer{padding:0 14px 14px;color:var(--ink);font-size:.92rem;white-space:pre-wrap;border-top:1px dashed #e7e1f5;padding-top:12px;}
   .card-actions{display:flex;gap:8px;padding:0 14px 14px;flex-wrap:wrap;}
   .mini{border:none;cursor:pointer;font-weight:700;font-size:.8rem;padding:8px 12px;border-radius:10px;background:#f1ecff;color:var(--accent);transition:transform .1s,background .2s;}
   .mini:active{transform:scale(.93);}
-  .mini.master{background:linear-gradient(135deg,var(--gold1),var(--gold2));color:#5a3a00;}
-  .mini.master.on{background:#e9f9ef;color:#1c8a4a;}
   .mini.del{background:#ffeef0;color:#e5446d;margin-left:auto;}
+  .drag-handle{display:flex;flex:0 0 auto;width:28px;height:28px;border:none;border-radius:6px;background:#fff;color:transparent;font-size:0;cursor:grab;align-items:center;justify-content:center;touch-action:none;margin:1px 0 0 0;position:relative;box-shadow:none;}
+  .drag-handle::before,.drag-handle::after{content:"";position:absolute;left:50%;width:0;height:0;filter:none;transform:translateX(-50%);}
+  .drag-handle::before{top:5px;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:7px solid #050505;}
+  .drag-handle::after{bottom:5px;border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid #050505;}
+  .drag-handle:active{cursor:grabbing;}
+  .card.dragging{opacity:.99;z-index:5;pointer-events:none;}
+  .card.dragging .card-inner{box-shadow:0 24px 48px rgba(35,20,95,.34);border-color:rgba(70,90,140,.25);transform:scale(1.015);}
+  .card.dragging .drag-handle{background:#fff;}
+  body.sorting .card.open .answer-wrap{max-height:0;}
+  body.sorting .card:not(.dragging){transition-duration:.28s;}
+  body.sorting .card:not(.dragging) .card-inner{animation:jiggleA .13s ease-in-out infinite alternate;}
+  body.sorting .card:not(.dragging):nth-child(even) .card-inner{animation-name:jiggleB;animation-duration:.15s;}
+  body.sorting .card:not(.dragging):nth-child(3n) .card-inner{animation-delay:-.06s;}
   .empty{text-align:center;color:var(--ink-soft);padding:48px 20px;font-weight:700;}
   .empty .big{font-size:2.4rem;display:block;margin-bottom:8px;}
 
@@ -195,7 +190,6 @@
 
   .toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-weight:700;font-size:.85rem;z-index:80;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-  #confetti{position:fixed;inset:0;pointer-events:none;z-index:70;}
 </style>
 </head>
 <body>
@@ -205,12 +199,7 @@
       <div class="title"><span class="logo">🎯</span><span>面接クエスト</span></div>
       <button class="gear" id="settingsBtn" aria-label="設定">⚙️</button>
     </div>
-    <div class="rank">
-      <span class="badge" id="rankBadge">🌱 面接エントリー</span>
-      <span class="count" id="rankCount">0 / 0 マスター</span>
-    </div>
-    <div class="bar"><i id="barFill"></i></div>
-    <div class="cheer" id="cheer"></div>
+    <div class="header-note">よく聞かれる順に整えて、声に出して練習しよう。</div>
   </header>
 
   <div class="toolbar">
@@ -342,8 +331,6 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<canvas id="confetti"></canvas>
-
 <script>
 "use strict";
 /* ===================== データ層 ===================== */
@@ -430,15 +417,16 @@ let keyword = "";
 const openIds = new Set();
 let editingId = null;
 let pickedCat = "self";
+let dragState = null;
 
 function load(){
   try{
     const raw = localStorage.getItem(STORE_KEY);
-    if(!raw){ return SAMPLE.map(c=>({...c, mastered:false})); }
+    if(!raw){ return SAMPLE.map(normalize); }
     const data = JSON.parse(raw);
     if(Array.isArray(data.cards)) return data.cards.map(normalize);
     return [];
-  }catch(e){ return SAMPLE.map(c=>({...c, mastered:false})); }
+  }catch(e){ return SAMPLE.map(normalize); }
 }
 function normalize(c){
   return {
@@ -446,12 +434,10 @@ function normalize(c){
     cat: CATS.some(x=>x.id===c.cat) ? c.cat : "other",
     q: String(c.q||""),
     a: String(c.a||""),
-    mastered: !!c.mastered,
   };
 }
 function save(){
   localStorage.setItem(STORE_KEY, JSON.stringify({app:"面接クエスト", version:1, savedAt:new Date().toISOString(), cards}));
-  renderRank();
 }
 function clampNum(n,a,b){ n=Number(n)||0; return Math.max(a,Math.min(b,n)); }
 function loadSettings(){
@@ -463,16 +449,6 @@ function uid(){ return "c"+Date.now().toString(36)+Math.random().toString(36).sl
 
 /* ===================== 表示ヘルパ ===================== */
 function esc(s){ return String(s).replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
-
-const RANKS = [
-  {min:0,   label:"🌱 面接エントリー", cheer:"まずは1問ずつ。あせらず行こう！"},
-  {min:.01, label:"📖 準備中",         cheer:"スタート切れた！その調子！"},
-  {min:.25, label:"💪 成長中",         cheer:"いいペース！声に出して練習しよう。"},
-  {min:.5,  label:"🔥 面接ファイター",  cheer:"折り返し突破！自信が形になってきた。"},
-  {min:.75, label:"⭐ あと一歩！",      cheer:"あと少し！本番でも落ち着いて。"},
-  {min:1,   label:"👑 面接マスター",    cheer:"完璧！あなたなら大丈夫。笑顔で行こう🌸"},
-];
-function rankFor(ratio){ let r=RANKS[0]; for(const x of RANKS){ if(ratio>=x.min) r=x; } return r; }
 
 /* ===================== レンダリング ===================== */
 const listEl = document.getElementById("list");
@@ -504,35 +480,25 @@ function renderList(){
   listEl.innerHTML = vis.map(c=>{
     const cat = catOf(c.cat);
     const open = openIds.has(c.id) ? "open":"";
-    const mastered = c.mastered ? "mastered":"";
     return `
-    <div class="card ${open} ${mastered}" data-id="${c.id}">
-      <div class="q-row" data-action="toggle">
-        <span class="cat-tag" style="background:${cat.color}">${esc(cat.label)}</span>
-        <span class="q-text">${esc(c.q)}</span>
-        <span class="chev">▾</span>
-      </div>
-      <div class="answer-wrap"><div class="answer">${esc(c.a)||"<span style='color:#aaa'>（回答が未入力です）</span>"}</div>
-        <div class="card-actions">
-          <button class="mini master ${c.mastered?"on":""}" data-action="master">${c.mastered?"✅ マスター済み":"⭐ マスターした！"}</button>
-          <button class="mini" data-action="edit">✏️ 編集</button>
-          <button class="mini del" data-action="delete">🗑️ 削除</button>
+    <div class="card ${open}" data-id="${c.id}">
+      <div class="card-inner">
+        <div class="q-row" data-action="toggle">
+          <span class="cat-tag" style="background:${cat.color}">${esc(cat.label)}</span>
+          <span class="q-text">${esc(c.q)}</span>
+          <button class="drag-handle" data-action="drag" type="button" aria-label="並び替え">↕</button>
+        </div>
+        <div class="answer-wrap"><div class="answer">${esc(c.a)||"<span style='color:#aaa'>（回答が未入力です）</span>"}</div>
+          <div class="card-actions">
+            <button class="mini" data-action="edit">✏️ 編集</button>
+            <button class="mini del" data-action="delete">🗑️ 削除</button>
+          </div>
         </div>
       </div>
     </div>`;
   }).join("");
 }
-function renderRank(){
-  const total = cards.length;
-  const done = cards.filter(c=>c.mastered).length;
-  const ratio = total? done/total : 0;
-  const r = rankFor(ratio);
-  document.getElementById("rankBadge").textContent = r.label;
-  document.getElementById("rankCount").textContent = `${done} / ${total} マスター`;
-  document.getElementById("barFill").style.width = Math.round(ratio*100)+"%";
-  document.getElementById("cheer").textContent = r.cheer;
-}
-function renderAll(){ renderChips(); renderList(); renderRank(); }
+function renderAll(){ renderChips(); renderList(); }
 
 /* ===================== カード操作 ===================== */
 listEl.addEventListener("click", e=>{
@@ -541,17 +507,10 @@ listEl.addEventListener("click", e=>{
   if(!cardEl) return;
   const id = cardEl.dataset.id;
   const action = actEl ? actEl.dataset.action : null;
+  if(action==="drag") return;
   if(action==="toggle"){
     if(openIds.has(id)) openIds.delete(id); else openIds.add(id);
     cardEl.classList.toggle("open");
-  }else if(action==="master"){
-    const c = cards.find(x=>x.id===id);
-    c.mastered = !c.mastered;
-    save(); renderList();
-    if(c.mastered){
-      toast("マスター！ナイス💪"); burstConfetti();
-      if(cards.length && cards.every(x=>x.mastered)) setTimeout(()=>{toast("全問マスター！自信を持って🌸");burstConfetti(true);},400);
-    }
   }else if(action==="edit"){
     openEdit(id);
   }else if(action==="delete"){
@@ -567,6 +526,114 @@ chipsEl.addEventListener("click", e=>{
   filter = b.dataset.filter; renderChips(); renderList();
 });
 document.getElementById("search").addEventListener("input", e=>{ keyword = e.target.value; renderList(); });
+
+function snapshotCardPositions(){
+  const map = new Map();
+  listEl.querySelectorAll(".card").forEach(card=>{
+    map.set(card.dataset.id, card.getBoundingClientRect());
+  });
+  return map;
+}
+function animateCardShift(beforePositions){
+  listEl.querySelectorAll(".card").forEach(card=>{
+    if(card.classList.contains("dragging")) return;
+    const first = beforePositions.get(card.dataset.id);
+    if(!first) return;
+    const last = card.getBoundingClientRect();
+    const dx = first.left - last.left;
+    const dy = first.top - last.top;
+    if(!dx && !dy) return;
+    card.style.transition = "none";
+    card.style.transform = `translate(${dx}px, ${dy}px)`;
+    card.offsetHeight;
+    card.style.transition = "";
+    card.style.transform = "";
+  });
+}
+function positionDraggedCard(clientX, clientY){
+  if(!dragState || !dragState.el) return;
+  dragState.currentX = clientX;
+  dragState.currentY = clientY;
+  dragState.el.style.transition = "none";
+  dragState.el.style.transform = "";
+  const base = dragState.el.getBoundingClientRect();
+  const x = clientX - dragState.offsetX - base.left;
+  const y = clientY - dragState.offsetY - base.top;
+  dragState.el.style.transform = `translate3d(${x}px, ${y}px, 0) scale(1.04)`;
+}
+function moveCard(dragId, targetId, before){
+  if(!dragId || !targetId || dragId===targetId) return false;
+  const from = cards.findIndex(c=>c.id===dragId);
+  const moving = cards[from];
+  if(from<0 || !moving) return false;
+  cards.splice(from, 1);
+  let to = cards.findIndex(c=>c.id===targetId);
+  if(to<0){ cards.splice(from, 0, moving); return false; }
+  if(!before) to += 1;
+  cards.splice(to, 0, moving);
+  const movingEl = listEl.querySelector(`.card[data-id="${CSS.escape(dragId)}"]`);
+  const targetEl = listEl.querySelector(`.card[data-id="${CSS.escape(targetId)}"]`);
+  if(movingEl && targetEl){
+    const first = snapshotCardPositions();
+    listEl.insertBefore(movingEl, before ? targetEl : targetEl.nextSibling);
+    animateCardShift(first);
+    positionDraggedCard(dragState?.currentX ?? 0, dragState?.currentY ?? 0);
+  }
+  return true;
+}
+function finishDrag(){
+  if(!dragState) return;
+  const changed = dragState.changed;
+  const draggedEl = dragState.el;
+  draggedEl.style.transition = "";
+  draggedEl.style.transform = "";
+  draggedEl.classList.remove("dragging");
+  document.body.classList.remove("sorting");
+  dragState = null;
+  if(changed){
+    save(); toast("順番を保存しました");
+    setTimeout(renderList, 180);
+  }
+}
+listEl.addEventListener("pointerdown", e=>{
+  const handle = e.target.closest(".drag-handle");
+  if(!handle) return;
+  const cardEl = handle.closest(".card");
+  if(!cardEl) return;
+  e.preventDefault();
+  cardEl.setPointerCapture?.(e.pointerId);
+  const rect = cardEl.getBoundingClientRect();
+  openIds.delete(cardEl.dataset.id);
+  cardEl.classList.remove("open");
+  document.body.classList.add("sorting");
+  dragState = {id:cardEl.dataset.id, el:cardEl, changed:false, lastTarget:null, lastBefore:null, offsetX:e.clientX-rect.left, offsetY:e.clientY-rect.top, currentX:e.clientX, currentY:e.clientY};
+  cardEl.classList.add("dragging");
+  positionDraggedCard(e.clientX, e.clientY);
+});
+listEl.addEventListener("pointermove", e=>{
+  if(!dragState) return;
+  e.preventDefault();
+  positionDraggedCard(e.clientX, e.clientY);
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const over = el && el.closest ? el.closest(".card") : null;
+  if(!over || over===dragState.el){
+    return;
+  }
+  const rect = over.getBoundingClientRect();
+  const before = e.clientY < rect.top + rect.height / 2;
+  const targetId = over.dataset.id;
+  if(dragState.lastTarget===targetId && dragState.lastBefore===before) return;
+  if(moveCard(dragState.id, targetId, before)){
+    dragState.changed = true;
+    dragState.lastTarget = targetId;
+    dragState.lastBefore = before;
+    dragState.el = listEl.querySelector(`.card[data-id="${CSS.escape(dragState.id)}"]`);
+    dragState.el?.classList.add("dragging");
+    positionDraggedCard(e.clientX, e.clientY);
+  }
+});
+listEl.addEventListener("pointerup", finishDrag);
+listEl.addEventListener("pointercancel", finishDrag);
 
 /* ===================== 追加・編集 ===================== */
 const editOverlay = document.getElementById("editOverlay");
@@ -599,7 +666,7 @@ document.getElementById("editSave").addEventListener("click", ()=>{
   if(editingId){
     const c = cards.find(x=>x.id===editingId); c.q=q; c.a=a; c.cat=pickedCat;
   }else{
-    const nc = {id:uid(), cat:pickedCat, q, a, mastered:false};
+    const nc = {id:uid(), cat:pickedCat, q, a};
     cards.unshift(nc); openIds.add(nc.id);
   }
   save(); renderAll(); closeEdit();
@@ -806,37 +873,12 @@ document.getElementById("tipsBtn").addEventListener("click", openTips);
 document.getElementById("tipsClose").addEventListener("click", closeTips);
 tipsOverlay.addEventListener("click", e=>{ if(e.target===tipsOverlay) closeTips(); });
 
-/* ===================== トースト & 紙吹雪 ===================== */
+/* ===================== トースト ===================== */
 let toastTimer;
 function toast(msg){
   const t=document.getElementById("toast");
   t.textContent=msg; t.classList.add("show");
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),1800);
-}
-const cv = document.getElementById("confetti");
-const ctx = cv.getContext("2d");
-function fitCanvas(){ cv.width=innerWidth; cv.height=innerHeight; }
-addEventListener("resize", fitCanvas); fitCanvas();
-function burstConfetti(big){
-  const colors=["#ffd86b","#ff9f43","#7b2ff7","#2575fc","#2ecc71","#ff5d8f"];
-  const N = big?160:70; const parts=[];
-  for(let i=0;i<N;i++){
-    parts.push({x:innerWidth/2+(Math.random()-.5)*120,y:innerHeight*0.32,vx:(Math.random()-.5)*9,vy:Math.random()*-9-4,g:0.28+Math.random()*0.12,s:6+Math.random()*7,rot:Math.random()*6.28,vr:(Math.random()-.5)*0.4,c:colors[i%colors.length],life:60+Math.random()*30});
-  }
-  let frame=0;
-  function step(){
-    ctx.clearRect(0,0,cv.width,cv.height); let alive=false;
-    for(const p of parts){
-      if(p.life<=0) continue; alive=true;
-      p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.life--;
-      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
-      ctx.fillStyle=p.c; ctx.globalAlpha=Math.max(0,Math.min(1,p.life/20));
-      ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); ctx.restore();
-    }
-    frame++;
-    if(alive && frame<140) requestAnimationFrame(step); else ctx.clearRect(0,0,cv.width,cv.height);
-  }
-  requestAnimationFrame(step);
 }
 
 /* ===================== 起動 ===================== */
