@@ -56,7 +56,9 @@
     background:rgba(255,255,255,.2);color:#fff;font-size:1.2rem;backdrop-filter:blur(4px);transition:transform .12s,background .2s;
   }
   .gear:active{transform:scale(.9) rotate(40deg);}
-  .header-note{margin-top:10px;font-size:.82rem;font-weight:700;opacity:.95;}
+  .header-tip{margin-top:10px;padding:7px 10px;border-radius:12px;background:rgba(255,255,255,.16);font-size:.76rem;font-weight:700;line-height:1.45;opacity:.96;display:flex;align-items:center;gap:8px;min-width:0;}
+  .tip-label{flex:0 0 auto;padding:1px 6px;border-radius:999px;background:rgba(255,255,255,.24);font-size:.68rem;letter-spacing:.04em;text-transform:uppercase;}
+  .tip-text{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
   /* ===== 模擬試験スタート ===== */
   .action-row{display:flex;gap:10px;}
@@ -66,18 +68,6 @@
     box-shadow:0 8px 20px rgba(255,90,120,.4);transition:transform .12s;display:flex;align-items:center;justify-content:center;gap:6px;
   }
   .quiz-start:active{transform:scale(.97);}
-  .tips-btn{
-    flex:1;border:2px solid #e8e0fa;cursor:pointer;font-weight:800;font-size:1rem;padding:15px 10px;border-radius:16px;
-    background:#fff;color:var(--accent);
-    box-shadow:0 4px 14px rgba(123,47,247,.10);transition:transform .12s;display:flex;align-items:center;justify-content:center;gap:6px;
-  }
-  .tips-btn:active{transform:scale(.97);}
-  .tip-item{display:flex;gap:14px;padding:16px 0;border-bottom:1px dashed #ece6fa;}
-  .tip-item:last-child{border-bottom:none;}
-  .tip-icon{flex:0 0 auto;font-size:1.7rem;line-height:1.2;margin-top:2px;}
-  .tip-num{font-size:.7rem;font-weight:800;color:#fff;background:var(--accent);padding:2px 7px;border-radius:999px;margin-bottom:5px;display:inline-block;}
-  .tip-title{font-weight:800;font-size:1rem;margin-bottom:4px;}
-  .tip-desc{font-size:.84rem;color:var(--ink-soft);line-height:1.6;}
 
   /* ===== ツールバー ===== */
   .toolbar{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
@@ -199,13 +189,12 @@
       <div class="title"><span class="logo">🎯</span><span>面接クエスト</span></div>
       <button class="gear" id="settingsBtn" aria-label="設定">⚙️</button>
     </div>
-    <div class="header-note">よく聞かれる順に整えて、声に出して練習しよう。</div>
+    <div class="header-tip" id="headerTip"><span class="tip-label">Tips</span><span class="tip-text" id="headerTipText">結論から短く答えて、理由と具体例をひとつ添える。</span></div>
   </header>
 
   <div class="toolbar">
     <div class="action-row">
       <button class="quiz-start" id="quizStartBtn">🎮 模擬試験</button>
-      <button class="tips-btn" id="tipsBtn">📋 面接の心得</button>
     </div>
     <input class="search" id="search" type="search" placeholder="🔍 質問・回答を検索…" autocomplete="off" />
     <div class="chips" id="chips"></div>
@@ -317,16 +306,6 @@
         <button class="btn primary" id="quizNext" style="display:none;">⏭ 次の問題へ</button>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- 面接の心得シート -->
-<div class="overlay" id="tipsOverlay">
-  <div class="sheet">
-    <h2>📋 面接の心得</h2>
-    <p class="hint">どんな会社の面接でも通用する、普遍的な心構えです。本番前に読み返そう。</p>
-    <div id="tipsList"></div>
-    <button class="btn primary" id="tipsClose" style="margin-top:10px;">閉じる</button>
   </div>
 </div>
 
@@ -511,6 +490,10 @@ listEl.addEventListener("click", e=>{
   if(action==="toggle"){
     if(openIds.has(id)) openIds.delete(id); else openIds.add(id);
     cardEl.classList.toggle("open");
+    if(openIds.has(id)){
+      const c = cards.find(x=>x.id===id);
+      if(c) setHeaderTip(c.cat);
+    }
   }else if(action==="edit"){
     openEdit(id);
   }else if(action==="delete"){
@@ -524,6 +507,7 @@ listEl.addEventListener("click", e=>{
 chipsEl.addEventListener("click", e=>{
   const b = e.target.closest("[data-filter]"); if(!b) return;
   filter = b.dataset.filter; renderChips(); renderList();
+  setHeaderTip(filter==="all" ? "default" : filter);
 });
 document.getElementById("search").addEventListener("input", e=>{ keyword = e.target.value; renderList(); });
 
@@ -768,6 +752,7 @@ function nextQuestion(){
   if(!c){ if(quiz.queue.length) return nextQuestion(); else return closeQuiz(); }
   quiz.count++; quiz.current=c;
   const cat = catOf(c.cat);
+  setHeaderTip(c.cat);
   document.getElementById("quizCount").textContent = "第"+quiz.count+"問";
   const ct = document.getElementById("quizCat"); ct.textContent = cat.label; ct.style.background = cat.color;
   document.getElementById("quizQ").textContent = c.q;
@@ -825,53 +810,22 @@ document.getElementById("quizReveal").addEventListener("click", revealAnswer);
 document.getElementById("quizNext").addEventListener("click", nextQuestion);
 
 /* ===================== 面接の心得 ===================== */
-const TIPS = [
-  {icon:"💬", title:"結論ファースト",
-   body:"最初に答えを述べ、後から理由・具体例を続ける。「〇〇です。なぜなら……」の形が基本。面接官が話の全体像を即座に掴めるようになる。"},
-  {icon:"🏗️", title:"PREP法で構成する",
-   body:"Point（結論）→ Reason（理由）→ Example（具体例）→ Point（再結論）の4段構成。どんな質問にも当てはめられる万能フレーム。"},
-  {icon:"🔢", title:"数字・固有名詞で語る",
-   body:"「頑張りました」より「3ヶ月で〇〇を20%改善しました」。具体的な数字・名称・期間が信頼と説得力を生む。"},
-  {icon:"⏱️", title:"1問1答は1〜2分以内",
-   body:"長すぎる回答は印象を薄め、要領の悪さを示す。シンプルに答えて面接官に深掘りさせるくらいがちょうどいい。"},
-  {icon:"🔄", title:"ネガティブはポジティブで締める",
-   body:"転職理由・失敗談は「前職の不満」で終わらせず、「次に実現したいこと」「そこで学んだこと」に着地させる。"},
-  {icon:"🧵", title:"志望動機と転職理由を一本の線にする",
-   body:"「前職で〇〇を経験→△△に限界を感じた→御社で□□がしたい」という一貫したストーリーが必要。矛盾があると一気に信頼を失う。"},
-  {icon:"🎯", title:"会社の言葉を借りる",
-   body:"理念・キャッチコピー・製品名を自分の回答に織り込む。「御社の『〇〇』という姿勢に共感して」という一言で企業研究の深さが伝わる。"},
-  {icon:"🤫", title:"沈黙を恐れない",
-   body:"少し考えてから答えるのは誠実さの表れ。「少し考えさせてください」はむしろ好印象。慌てて言葉を埋めるより、整理してから話す。"},
-  {icon:"❓", title:"逆質問は必ず3つ用意する",
-   body:"「特にありません」は入社意欲のなさを示す致命傷。仕事内容・チーム・成長環境への関心が伝わる質問を3つ以上ストックしておく。"},
-  {icon:"✨", title:"第一印象は最初の15秒",
-   body:"笑顔・声のトーン・姿勢・目線が評価の土台になる。内容より先に「一緒に働きたいか」が判断される。入室から着席までが勝負。"},
-  {icon:"👑", title:"最終面接は「意思」の確認",
-   body:"役員・社長は能力より「本当に来るか」「長く活躍できるか」を見ている。熱意と覚悟を具体的な言葉にして伝える場と心得る。"},
-  {icon:"👂", title:"「聞く姿勢」も評価される",
-   body:"面接は話すだけでなく聞く場。面接官の話に相槌・うなずきで反応し、質問をしっかり最後まで聞いてから答える。"},
-  {icon:"🪞", title:"失敗談は「学び」で締める",
-   body:"失敗そのものでなく、そこからの成長・変化を見ている。「〇〇という失敗から△△を学び、今は□□しています」の形で締める。"},
-  {icon:"📝", title:"面接官の言葉を反復する",
-   body:"相手が使ったキーワードを自分の回答に取り込むと、傾聴力と共感をアピールできる。「おっしゃった〇〇について言うと……」は有効な技法。"},
+const HEADER_TIPS = [
+  {key:"default", text:"結論から短く答えて、理由と具体例をひとつ添える。"},
+  {key:"self", text:"自己紹介は経歴より、今の強みが伝わる順で話す。"},
+  {key:"reason", text:"転職理由は不満で終えず、次に実現したいことへ着地させる。"},
+  {key:"motiv", text:"志望動機は会社の言葉と自分の経験を一本につなげる。"},
+  {key:"pr", text:"自己PRは成果より、再現できる行動パターンを見せる。"},
+  {key:"reverse", text:"逆質問は仕事内容・チーム・期待役割の順で用意する。"},
+  {key:"other", text:"答えに迷ったら、少し考えてから短く整理して話す。"}
 ];
-const tipsOverlay = document.getElementById("tipsOverlay");
-function openTips(){
-  document.getElementById("tipsList").innerHTML = TIPS.map((t,i)=>`
-    <div class="tip-item">
-      <div class="tip-icon">${t.icon}</div>
-      <div>
-        <span class="tip-num">${String(i+1).padStart(2,"0")}</span>
-        <div class="tip-title">${esc(t.title)}</div>
-        <div class="tip-desc">${esc(t.body)}</div>
-      </div>
-    </div>`).join("");
-  tipsOverlay.classList.add("show");
+function tipFor(key){
+  return (HEADER_TIPS.find(t=>t.key===key) || HEADER_TIPS[0]).text;
 }
-function closeTips(){ tipsOverlay.classList.remove("show"); }
-document.getElementById("tipsBtn").addEventListener("click", openTips);
-document.getElementById("tipsClose").addEventListener("click", closeTips);
-tipsOverlay.addEventListener("click", e=>{ if(e.target===tipsOverlay) closeTips(); });
+function setHeaderTip(key){
+  document.getElementById("headerTipText").textContent = tipFor(key);
+}
+setHeaderTip("default");
 
 /* ===================== トースト ===================== */
 let toastTimer;
